@@ -1,0 +1,64 @@
+name: quran_companion
+description: A Quran reading app with Tajweed color-coding and Waqf signs for elderly users and learners
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Audio
+  audioplayers: ^5.2.1         # Play Tajweed/Waqf audio examples
+
+  # HTTP & Data
+  http: ^1.1.0                 # Fetch Quran data from APIs
+  xml: ^6.3.0                  # Parse Tanzil XML if needed
+
+  # Storage
+  sqflite: ^2.3.0              # Local database for offline access
+  path: ^1.8.3                 # Path utilities
+  shared_preferences: ^2.2.2   # Store user settings
+
+  # Utils
+  intl: ^0.18.1                # Date/number formatting
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Assets
+  assets:
+    # Data files
+    - assets/data/
+    - assets/data/sample_surah_with_waqf.json
+
+    # Audio examples
+    - assets/audio/tajweed/ghunnah.mp3
+    - assets/audio/tajweed/idghaam.mp3
+    - assets/audio/tajweed/ikhfa.mp3
+    - assets/audio/tajweed/iqlab.mp3
+    - assets/audio/tajweed/qalqalah.mp3
+    - assets/audio/tajweed/madd.mp3
+
+    - assets/audio/waqf/must_stop.mp3
+    - assets/audio/waqf/do_not_stop.mp3
+    - assets/audio/waqf/permissible.mp3
+    - assets/audio/waqf/better_continue.mp3
+    - assets/audio/waqf/better_stop.mp3
+
+  # Fonts
+  fonts:
+    - family: Amiri
+      fonts:
+        - asset: assets/fonts/Amiri-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Amiri-Bold.ttf
+          weight: 700
