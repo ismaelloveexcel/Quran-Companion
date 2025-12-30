@@ -1,9 +1,11 @@
 import { useParams, Link } from "wouter";
 import { SURAHS } from "@/lib/quran-data";
-import { ArrowLeft, Minus, Plus, Play, Pause } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Play, Pause, Lightbulb } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import TajweedGuide from "@/components/TajweedGuide";
+import { Button } from "@/components/ui/button";
 
 export default function Read() {
   const { id } = useParams();
@@ -11,6 +13,7 @@ export default function Read() {
   const surah = SURAHS.find((s) => s.id === surahId);
   const [fontSize, setFontSize] = useState(32); // Default large font size
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showTips, setShowTips] = useState(true);
 
   if (!surah) return <div className="p-10 text-center">Surah not found</div>;
 
@@ -28,7 +31,9 @@ export default function Read() {
           <h1 className="font-bold text-lg">{surah.transliteration}</h1>
           <p className="text-xs text-muted-foreground">{surah.translation}</p>
         </div>
-        <div className="w-20" /> {/* Spacer for centering */}
+        <div className="w-auto">
+             <TajweedGuide />
+        </div>
       </div>
 
       {/* Font Controls - Fixed or Floating */}
@@ -48,6 +53,18 @@ export default function Read() {
         >
           <Plus size={24} />
         </button>
+        
+        <div className="w-px h-6 bg-border mx-2" />
+        
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => setShowTips(!showTips)}
+          className={cn("rounded-full", showTips ? "bg-accent text-accent-foreground" : "text-muted-foreground")}
+          title="Toggle Pronunciation Tips"
+        >
+          <Lightbulb size={20} />
+        </Button>
       </div>
 
       {/* Content */}
@@ -80,6 +97,23 @@ export default function Read() {
                     {ayah.number}
                   </span>
                 </p>
+
+                {/* Pronunciation Tip - Contextual Guide */}
+                <AnimatePresence>
+                  {showTips && ayah.pronunciationTip && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="bg-accent/30 border border-accent rounded-lg p-3 flex items-start gap-3"
+                    >
+                      <Lightbulb className="w-5 h-5 text-yellow-600 dark:text-yellow-500 shrink-0 mt-0.5" />
+                      <p className="text-sm text-foreground/80 font-medium">
+                        {ayah.pronunciationTip}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Translation */}
                 <p className="text-lg text-muted-foreground leading-relaxed">

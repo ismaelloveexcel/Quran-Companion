@@ -12,6 +12,7 @@ export interface Ayah {
   number: number;
   text: string;
   translation: string;
+  pronunciationTip?: string;
 }
 
 export const SURAHS: Surah[] = [
@@ -23,13 +24,47 @@ export const SURAHS: Surah[] = [
     verses: 7,
     type: "Meccan",
     content: [
-      { number: 1, text: "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ", translation: "In the name of Allah, the Entirely Merciful, the Especially Merciful." },
-      { number: 2, text: "ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ", translation: "[All] praise is [due] to Allah, Lord of the worlds -" },
-      { number: 3, text: "ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ", translation: "The Entirely Merciful, the Especially Merciful," },
-      { number: 4, text: "مَـٰلِكِ يَوْمِ ٱلدِّينِ", translation: "Sovereign of the Day of Recompense." },
-      { number: 5, text: "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ", translation: "It is You we worship and You we ask for help." },
-      { number: 6, text: "ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ", translation: "Guide us to the straight path -" },
-      { number: 7, text: "صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ", translation: "The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray." },
+      { 
+        number: 1, 
+        text: "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ", 
+        translation: "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
+        pronunciationTip: "Pronounce 'Allah' with a heavy/thick sound (Tafkheem)."
+      },
+      { 
+        number: 2, 
+        text: "ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ", 
+        translation: "[All] praise is [due] to Allah, Lord of the worlds -",
+        pronunciationTip: "Clear 'Ha' (ح) in 'Al-Hamd' - comes from the middle of the throat."
+      },
+      { 
+        number: 3, 
+        text: "ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ", 
+        translation: "The Entirely Merciful, the Especially Merciful,",
+        pronunciationTip: "Elongate the 'aa' in 'Rahmaan' for 2 counts."
+      },
+      { 
+        number: 4, 
+        text: "مَـٰلِكِ يَوْمِ ٱلدِّينِ", 
+        translation: "Sovereign of the Day of Recompense.",
+        pronunciationTip: "Sharp 'Da' sound in 'Deen'. Do not confuse with 'Dhaal'."
+      },
+      { 
+        number: 5, 
+        text: "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ", 
+        translation: "It is You we worship and You we ask for help.",
+        pronunciationTip: "Strong stress (Shaddah) on the 'Yaa' in 'Iyyaka'."
+      },
+      { 
+        number: 6, 
+        text: "ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ", 
+        translation: "Guide us to the straight path -"
+      },
+      { 
+        number: 7, 
+        text: "صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ", 
+        translation: "The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray.",
+        pronunciationTip: "Long elongation (Madd) in 'Daaalleen' (6 counts)."
+      },
     ]
   },
   {
