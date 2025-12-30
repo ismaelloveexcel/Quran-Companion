@@ -5,6 +5,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import TajweedGuide from "@/components/TajweedGuide";
+import ColorLegend, { CompactColorLegend } from "@/components/ColorLegend";
+import TajweedText from "@/components/TajweedText";
 import { Button } from "@/components/ui/button";
 
 export default function Read() {
@@ -31,7 +33,8 @@ export default function Read() {
           <h1 className="font-bold text-lg">{surah.transliteration}</h1>
           <p className="text-xs text-muted-foreground">{surah.translation}</p>
         </div>
-        <div className="w-auto">
+        <div className="w-auto flex gap-2">
+             <ColorLegend />
              <TajweedGuide />
         </div>
       </div>
@@ -87,16 +90,19 @@ export default function Read() {
               className="group space-y-6"
             >
               <div className="flex flex-col gap-6">
-                {/* Arabic Text */}
-                <p 
-                  className="text-right leading-[2.2] text-foreground font-arabic"
-                  style={{ fontSize: `${fontSize}px` }}
-                >
-                  {ayah.text} 
-                  <span className="inline-flex items-center justify-center w-[1em] h-[1em] mx-2 border-2 border-primary/20 rounded-full text-[0.4em] align-middle text-primary font-sans font-bold">
+                {/* Arabic Text with Tajweed Colors & Waqf Signs */}
+                <div className="flex items-start gap-3">
+                  <TajweedText
+                    arabicText={ayah.text}
+                    fontSize={fontSize}
+                    showTajweed={true}
+                    showWaqf={true}
+                    waqfPositions={ayah.waqfPositions}
+                  />
+                  <span className="inline-flex items-center justify-center min-w-[2.5rem] h-10 border-2 border-primary/20 rounded-full text-sm text-primary font-sans font-bold shrink-0">
                     {ayah.number}
                   </span>
-                </p>
+                </div>
 
                 {/* Pronunciation Tip - Contextual Guide */}
                 <AnimatePresence>
