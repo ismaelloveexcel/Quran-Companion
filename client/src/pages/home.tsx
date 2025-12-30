@@ -1,10 +1,18 @@
 import Layout from "@/components/layout";
-import { SURAHS } from "@/lib/quran-data";
 import SurahCard from "@/components/SurahCard";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { getAllSurahs, ApiSurah } from "@/lib/quran-api";
+import { Loader2 } from "lucide-react";
 
 export default function Home() {
   const greeting = getGreeting();
+
+  const { data: surahs, isLoading, error } = useQuery<ApiSurah[]>({
+    queryKey: ["surahs"],
+    queryFn: getAllSurahs,
+    staleTime: Infinity,
+  });
 
   return (
     <Layout>
@@ -20,23 +28,39 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Featured / Continue Reading could go here */}
-
         {/* Surah List */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-foreground/80 px-1">All Surahs</h2>
-          <div className="space-y-3 pb-8">
-            {SURAHS.map((surah, index) => (
-              <motion.div
-                key={surah.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.4 }}
-              >
-                <SurahCard surah={surah} />
-              </motion.div>
-            ))}
-          </div>
+          <h2 className="text-xl font-semibold text-foreground/80 px-1">
+            All Surahs <span className="text-sm font-normal text-muted-foreground">(114 Chapters)</span>
+          </h2>
+
+          {isLoading && (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
+              <p className="text-muted-foreground">Loading the Holy Quran...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 text-center">
+              <p className="text-destructive font-medium">Unable to load Quran data. Please check your internet connection and try again.</p>
+            </div>
+          )}
+
+          {surahs && (
+            <div className="space-y-3 pb-8">
+              {surahs.map((surah, index) => (
+                <motion.div
+                  key={surah.number}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(index * 0.02, 0.5), duration: 0.3 }}
+                >
+                  <SurahCard surah={surah} />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Layout>
