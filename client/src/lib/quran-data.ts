@@ -75,10 +75,10 @@ export const SURAHS: Surah[] = [
     verses: 286,
     type: "Medinan",
     content: [
-      { number: 1, text: "الٓمٓ", translation: "Alif, Lam, Meem." },
-      { number: 2, text: "ذَٰلِكَ ٱلْكِتَـٰبُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًۭى لِّلْمُتَّقِينَ", translation: "This is the Book about which there is no doubt, a guidance for those conscious of Allah -" },
+      { number: 1, text: "الٓمٓ", translation: "Alif, Lam, Meem.", pronunciationTip: "Pause briefly after each letter: Alif... Laaam... Meeem." },
+      { number: 2, text: "ذَٰلِكَ ٱلْكِتَـٰبُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًۭى لِّلْمُتَّقِينَ", translation: "This is the Book about which there is no doubt, a guidance for those conscious of Allah -", pronunciationTip: "Notice the three dots (ۛ)? You can stop at 'Rayb' OR 'Feeh', but not both." },
       { number: 3, text: "ٱلَّذِينَ يُؤْمِنُونَ بِٱلْغَيْبِ وَيُقِيمُونَ ٱلصَّلَوٰةَ وَمِمَّا رَزَقْنَـٰهُمْ يُنفِقُونَ", translation: "Who believe in the unseen, establish prayer, and spend out of what We have provided for them," },
-      { number: 4, text: "وَٱلَّذِينَ يُؤْمِنُونَ بِمَآ أُنزِلَ إِلَيْكَ وَمَآ أُنزِلَ مِن قَبْلِكَ وَبِٱلْـَٔاخِرَةِ هُمْ يُوقِنُونَ", translation: "And who believe in what has been revealed to you, [O Muhammad], and what was revealed before you, and of the Hereafter they are certain [in faith]." },
+      { number: 4, text: "وَٱلَّذِينَ يُؤْمِنُونَ بِمَآ أُنزِلَ إِلَيْكَ وَمَآ أُنزِلَ مِن قَبْلِكَ وَبِٱلْـَٔاخِرَةِ هُمْ يُوقِنُونَ", translation: "And who believe in what has been revealed to you, and what was revealed before you, and of the Hereafter they are certain." },
       { number: 5, text: "أُو۟لَـٰٓئِكَ عَلَىٰ هُدًۭى مِّن رَّبِّهِمْ ۖ وَأُو۟لَـٰٓئِكَ هُمُ ٱلْمُفْلِحُونَ", translation: "Those are upon [right] guidance from their Lord, and it is those who are the successful." }
     ]
   },
