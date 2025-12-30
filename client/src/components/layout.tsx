@@ -52,13 +52,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 function NavItem({ href, active, icon: Icon, label }: { href: string, active: boolean, icon: any, label: string }) {
   return (
     <Link href={href}>
-      <a className={cn(
-        "flex flex-col items-center justify-center w-full h-full gap-1 transition-all duration-300",
+      <div className={cn(
+        "flex flex-col items-center justify-center w-full h-full gap-1 transition-all duration-300 cursor-pointer",
         active ? "text-primary scale-105" : "text-muted-foreground hover:text-primary/70"
       )}>
         <Icon size={32} strokeWidth={active ? 2.5 : 2} />
         <span className={cn("text-xs font-medium", active ? "font-bold" : "")}>{label}</span>
-      </a>
+      </div>
     </Link>
   );
 }

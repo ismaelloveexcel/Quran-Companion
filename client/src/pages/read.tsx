@@ -22,10 +22,10 @@ export default function Read() {
       {/* Top Navigation Bar */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/40 px-4 py-4 flex items-center justify-between shadow-sm">
         <Link href="/">
-          <a className="p-2 -ml-2 rounded-full hover:bg-muted text-foreground transition-colors flex items-center gap-2 group">
+          <div className="p-2 -ml-2 rounded-full hover:bg-muted text-foreground transition-colors flex items-center gap-2 group cursor-pointer">
             <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Back</span>
-          </a>
+          </div>
         </Link>
         <div className="text-center">
           <h1 className="font-bold text-lg">{surah.transliteration}</h1>

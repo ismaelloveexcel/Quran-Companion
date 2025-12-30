@@ -5,7 +5,7 @@ import { ChevronRight } from "lucide-react";
 export default function SurahCard({ surah }: { surah: Surah }) {
   return (
     <Link href={`/read/${surah.id}`}>
-      <a className="block group">
+      <div className="block group cursor-pointer">
         <div className="bg-card hover:bg-accent/50 border border-border/40 rounded-2xl p-6 transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-between gap-4">
           <div className="flex items-center gap-5">
             {/* Number Badge */}
@@ -28,7 +28,7 @@ export default function SurahCard({ surah }: { surah: Surah }) {
             <ChevronRight className="text-muted-foreground/30 group-hover:text-primary transition-colors" />
           </div>
         </div>
-      </a>
+      </div>
     </Link>
   );
 }
