@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import TajweedGuide from "@/components/TajweedGuide";
+import ColorLegend from "@/components/ColorLegend";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getSurahWithTranslation, PRONUNCIATION_TIPS } from "@/lib/quran-api";
@@ -151,7 +152,8 @@ export default function Read() {
           <h1 className="font-bold text-lg">{arabic.englishName}</h1>
           <p className="text-xs text-muted-foreground">{arabic.englishNameTranslation}</p>
         </div>
-        <div className="w-auto">
+        <div className="w-auto flex gap-2">
+          <ColorLegend />
           <TajweedGuide />
         </div>
       </div>
