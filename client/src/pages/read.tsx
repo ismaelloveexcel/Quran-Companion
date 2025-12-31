@@ -1,6 +1,6 @@
 import { useParams, Link } from "wouter";
-import { ArrowLeft, Minus, Plus, Play, Pause, Lightbulb, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Minus, Plus, Play, Pause, Lightbulb, Loader2, Share2, Check } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import TajweedGuide from "@/components/TajweedGuide";
@@ -8,20 +8,86 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getSurahWithTranslation, PRONUNCIATION_TIPS } from "@/lib/quran-api";
 import ColorCodedVerse, { StopMarksLegend } from "@/components/ColorCodedVerse";
+import { 
+  saveFontSize, 
+  loadFontSize, 
+  saveLastRead, 
+  saveShowTips, 
+  loadShowTips, 
+  saveShowLegend, 
+  loadShowLegend 
+} from "@/lib/storage";
 
 export default function Read() {
   const { id } = useParams();
   const surahNumber = parseInt(id || "1");
-  const [fontSize, setFontSize] = useState(32);
+  const [fontSize, setFontSize] = useState(() => loadFontSize(32));
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showTips, setShowTips] = useState(true);
-  const [showLegend, setShowLegend] = useState(true);
+  const [showTips, setShowTips] = useState(() => loadShowTips(true));
+  const [showLegend, setShowLegend] = useState(() => loadShowLegend(true));
+  const [copiedVerse, setCopiedVerse] = useState<number | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["surah", surahNumber],
     queryFn: () => getSurahWithTranslation(surahNumber),
     staleTime: Infinity,
   });
+
+  // Persist font size changes
+  useEffect(() => {
+    saveFontSize(fontSize);
+  }, [fontSize]);
+
+  // Persist show tips preference
+  useEffect(() => {
+    saveShowTips(showTips);
+  }, [showTips]);
+
+  // Persist show legend preference
+  useEffect(() => {
+    saveShowLegend(showLegend);
+  }, [showLegend]);
+
+  // Save last read position when data is loaded
+  useEffect(() => {
+    if (data) {
+      saveLastRead({
+        surahNumber: data.arabic.number,
+        surahName: data.arabic.englishName,
+        surahNameArabic: data.arabic.name,
+        verseNumber: 1,
+        totalVerses: data.arabic.numberOfAyahs,
+        timestamp: Date.now(),
+      });
+    }
+  }, [data]);
+
+  // Share/copy verse handler
+  const handleShareVerse = useCallback(async (verseNumber: number, arabicText: string, translation: string, surahName: string) => {
+    const shareText = `${arabicText}\n\n"${translation}"\n\n— ${surahName}, Verse ${verseNumber}`;
+    
+    // Try Web Share API first (mobile-friendly)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${surahName} - Verse ${verseNumber}`,
+          text: shareText,
+        });
+        return;
+      } catch (err) {
+        // User cancelled or share failed, fall back to clipboard
+      }
+    }
+    
+    // Fallback to clipboard
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopiedVerse(verseNumber);
+      setTimeout(() => setCopiedVerse(null), 2000);
+    } catch (err) {
+      console.warn('Failed to copy to clipboard:', err);
+    }
+  }, []);
 
   if (isLoading) {
     return (
@@ -69,50 +135,59 @@ export default function Read() {
         </div>
       </div>
 
-      {/* Font Controls */}
-      <div className="sticky top-[73px] z-40 bg-card/95 backdrop-blur border-b border-border/40 px-6 py-3 flex items-center justify-center gap-4 shadow-sm flex-wrap">
-        <button 
-          onClick={() => setFontSize(Math.max(24, fontSize - 4))}
-          className="p-3 rounded-full hover:bg-muted active:scale-95 transition-all text-muted-foreground hover:text-foreground"
-          aria-label="Decrease font size"
-          data-testid="button-font-decrease"
-        >
-          <Minus size={20} />
-        </button>
-        <span className="text-sm font-medium text-muted-foreground min-w-[3ch] text-center">Aa</span>
-        <button 
-          onClick={() => setFontSize(Math.min(64, fontSize + 4))}
-          className="p-3 rounded-full hover:bg-muted active:scale-95 transition-all text-primary"
-          aria-label="Increase font size"
-          data-testid="button-font-increase"
-        >
-          <Plus size={24} />
-        </button>
+      {/* Font Controls + Progress */}
+      <div className="sticky top-[73px] z-40 bg-card/95 backdrop-blur border-b border-border/40 px-6 py-3 flex flex-col gap-2 shadow-sm">
+        {/* Progress Indicator */}
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>{arabic.numberOfAyahs} Verses</span>
+          <span>{arabic.revelationType}</span>
+        </div>
         
-        <div className="w-px h-6 bg-border mx-1" />
-        
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => setShowTips(!showTips)}
-          className={cn("rounded-full", showTips ? "bg-accent text-accent-foreground" : "text-muted-foreground")}
-          title="Toggle Pronunciation Tips"
-          data-testid="button-toggle-tips"
-        >
-          <Lightbulb size={20} />
-        </Button>
+        {/* Controls Row */}
+        <div className="flex items-center justify-center gap-4 flex-wrap">
+          <button 
+            onClick={() => setFontSize(Math.max(24, fontSize - 4))}
+            className="p-3 rounded-full hover:bg-muted active:scale-95 transition-all text-muted-foreground hover:text-foreground"
+            aria-label="Decrease font size"
+            data-testid="button-font-decrease"
+          >
+            <Minus size={20} />
+          </button>
+          <span className="text-sm font-medium text-muted-foreground min-w-[3ch] text-center">Aa</span>
+          <button 
+            onClick={() => setFontSize(Math.min(64, fontSize + 4))}
+            className="p-3 rounded-full hover:bg-muted active:scale-95 transition-all text-primary"
+            aria-label="Increase font size"
+            data-testid="button-font-increase"
+          >
+            <Plus size={24} />
+          </button>
+          
+          <div className="w-px h-6 bg-border mx-1" />
+          
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setShowTips(!showTips)}
+            className={cn("rounded-full", showTips ? "bg-accent text-accent-foreground" : "text-muted-foreground")}
+            title="Toggle Pronunciation Tips"
+            data-testid="button-toggle-tips"
+          >
+            <Lightbulb size={20} />
+          </Button>
 
-        <Button 
-          variant={showLegend ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => setShowLegend(!showLegend)}
-          className="rounded-full text-xs gap-1"
-          title="Toggle Color Legend"
-          data-testid="button-toggle-legend"
-        >
-          <span className="w-2 h-2 rounded-full bg-gradient-to-r from-red-500 via-amber-500 to-green-500"></span>
-          Legend
-        </Button>
+          <Button 
+            variant={showLegend ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setShowLegend(!showLegend)}
+            className="rounded-full text-xs gap-1"
+            title="Toggle Color Legend"
+            data-testid="button-toggle-legend"
+          >
+            <span className="w-2 h-2 rounded-full bg-gradient-to-r from-red-500 via-amber-500 to-green-500"></span>
+            Legend
+          </Button>
+        </div>
       </div>
 
       {/* Content */}
@@ -177,10 +252,26 @@ export default function Read() {
                     )}
                   </AnimatePresence>
 
-                  {/* Translation */}
-                  <p className="text-lg text-muted-foreground leading-relaxed">
-                    {translation}
-                  </p>
+                  {/* Translation with Share Button */}
+                  <div className="flex items-start justify-between gap-4">
+                    <p className="text-lg text-muted-foreground leading-relaxed flex-1">
+                      {translation}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity rounded-full h-9 w-9"
+                      onClick={() => handleShareVerse(ayah.numberInSurah, ayah.text, translation, arabic.englishName)}
+                      title={copiedVerse === ayah.numberInSurah ? "Copied!" : "Share verse"}
+                      data-testid={`share-verse-${ayah.numberInSurah}`}
+                    >
+                      {copiedVerse === ayah.numberInSurah ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <Share2 className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 
                 {index !== arabic.ayahs.length - 1 && (
