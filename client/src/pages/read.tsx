@@ -62,7 +62,7 @@ export default function Read() {
     }
   }, [data]);
 
-  // Share/copy verse handler
+  // Share/copy verse handler with fallbacks for different browser contexts
   const handleShareVerse = useCallback(async (verseNumber: number, arabicText: string, translation: string, surahName: string) => {
     const shareText = `${arabicText}\n\n"${translation}"\n\n— ${surahName}, Verse ${verseNumber}`;
     
@@ -79,13 +79,34 @@ export default function Read() {
       }
     }
     
-    // Fallback to clipboard
+    // Fallback to clipboard API (check availability for secure contexts)
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        setCopiedVerse(verseNumber);
+        setTimeout(() => setCopiedVerse(null), 2000);
+        return;
+      } catch (err) {
+        // Clipboard write failed, try legacy fallback
+      }
+    }
+    
+    // Legacy fallback using document.execCommand (for older browsers/insecure contexts)
     try {
-      await navigator.clipboard.writeText(shareText);
-      setCopiedVerse(verseNumber);
-      setTimeout(() => setCopiedVerse(null), 2000);
+      const textArea = document.createElement('textarea');
+      textArea.value = shareText;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      const success = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      if (success) {
+        setCopiedVerse(verseNumber);
+        setTimeout(() => setCopiedVerse(null), 2000);
+      }
     } catch (err) {
-      console.warn('Failed to copy to clipboard:', err);
+      console.warn('All copy methods failed:', err);
     }
   }, []);
 

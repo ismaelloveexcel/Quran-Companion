@@ -53,7 +53,22 @@ export function loadLastRead(): LastReadData | null {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.LAST_READ);
     if (saved) {
-      return JSON.parse(saved) as LastReadData;
+      const parsed = JSON.parse(saved);
+      // Validate the parsed data has required fields
+      if (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        typeof parsed.surahNumber === 'number' &&
+        typeof parsed.surahName === 'string' &&
+        typeof parsed.surahNameArabic === 'string' &&
+        typeof parsed.verseNumber === 'number' &&
+        typeof parsed.totalVerses === 'number' &&
+        typeof parsed.timestamp === 'number'
+      ) {
+        return parsed as LastReadData;
+      }
+      // Invalid data structure, clear it
+      localStorage.removeItem(STORAGE_KEYS.LAST_READ);
     }
   } catch (e) {
     console.warn('Failed to load last read position:', e);
