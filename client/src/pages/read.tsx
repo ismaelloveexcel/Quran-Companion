@@ -7,6 +7,7 @@ import TajweedGuide from "@/components/TajweedGuide";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getSurahWithTranslation, PRONUNCIATION_TIPS } from "@/lib/quran-api";
+import ColorCodedVerse, { StopMarksLegend } from "@/components/ColorCodedVerse";
 
 export default function Read() {
   const { id } = useParams();
@@ -14,6 +15,7 @@ export default function Read() {
   const [fontSize, setFontSize] = useState(32);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showTips, setShowTips] = useState(true);
+  const [showLegend, setShowLegend] = useState(true);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["surah", surahNumber],
@@ -68,7 +70,7 @@ export default function Read() {
       </div>
 
       {/* Font Controls */}
-      <div className="sticky top-[73px] z-40 bg-card/95 backdrop-blur border-b border-border/40 px-6 py-3 flex items-center justify-center gap-6 shadow-sm">
+      <div className="sticky top-[73px] z-40 bg-card/95 backdrop-blur border-b border-border/40 px-6 py-3 flex items-center justify-center gap-4 shadow-sm flex-wrap">
         <button 
           onClick={() => setFontSize(Math.max(24, fontSize - 4))}
           className="p-3 rounded-full hover:bg-muted active:scale-95 transition-all text-muted-foreground hover:text-foreground"
@@ -87,7 +89,7 @@ export default function Read() {
           <Plus size={24} />
         </button>
         
-        <div className="w-px h-6 bg-border mx-2" />
+        <div className="w-px h-6 bg-border mx-1" />
         
         <Button 
           variant="ghost" 
@@ -99,10 +101,35 @@ export default function Read() {
         >
           <Lightbulb size={20} />
         </Button>
+
+        <Button 
+          variant={showLegend ? "secondary" : "ghost"}
+          size="sm"
+          onClick={() => setShowLegend(!showLegend)}
+          className="rounded-full text-xs gap-1"
+          title="Toggle Color Legend"
+          data-testid="button-toggle-legend"
+        >
+          <span className="w-2 h-2 rounded-full bg-gradient-to-r from-red-500 via-amber-500 to-green-500"></span>
+          Legend
+        </Button>
       </div>
 
       {/* Content */}
-      <div className="max-w-2xl mx-auto px-6 py-8 space-y-12">
+      <div className="max-w-2xl mx-auto px-6 py-8 space-y-8">
+        {/* Color Legend - Collapsible */}
+        <AnimatePresence>
+          {showLegend && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+            >
+              <StopMarksLegend />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Bismillah - Skip for Surah 1 (Al-Fatiha) and Surah 9 (At-Tawbah) */}
         {surahNumber !== 1 && surahNumber !== 9 && (
           <div className="text-center py-8 mb-4 font-arabic text-4xl text-primary/80">
@@ -126,17 +153,12 @@ export default function Read() {
                 data-testid={`ayah-${ayah.numberInSurah}`}
               >
                 <div className="flex flex-col gap-6">
-                  {/* Arabic Text */}
-                  <p 
-                    className="text-right leading-[2.2] text-foreground font-arabic"
-                    style={{ fontSize: `${fontSize}px` }}
-                    dir="rtl"
-                  >
-                    {ayah.text} 
-                    <span className="inline-flex items-center justify-center w-[1em] h-[1em] mx-2 border-2 border-primary/20 rounded-full text-[0.4em] align-middle text-primary font-sans font-bold">
-                      {ayah.numberInSurah}
-                    </span>
-                  </p>
+                  {/* Arabic Text with Color-Coded Stopping Marks */}
+                  <ColorCodedVerse 
+                    text={ayah.text} 
+                    fontSize={fontSize} 
+                    verseNumber={ayah.numberInSurah} 
+                  />
 
                   {/* Pronunciation Tip */}
                   <AnimatePresence>
