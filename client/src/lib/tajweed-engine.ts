@@ -1,5 +1,17 @@
 import { TajweedRule, TajweedSpan } from './tajweed-rules';
 
+// Arabic diacritical marks (Unicode constants)
+const SHADDAH = '\u0651';      // ّ - Emphasis/doubling mark
+const SUKOON = '\u0652';       // ْ - No vowel mark
+const TANWEEN_FATHATAN = '\u064B';  // ً - Tanween with Fatha
+const TANWEEN_DAMMATAN = '\u064C';  // ٌ - Tanween with Damma  
+const TANWEEN_KASRATAN = '\u064D';  // ٍ - Tanween with Kasra
+const MADD_SIGN = '\u0653';    // ٓ - Madd above
+const ALIF_MADD = '\u0622';    // آ - Alif with Madd
+
+// Hamza variants
+const HAMZA_VARIANTS = '[\u0621\u0623\u0624\u0625\u0626]';
+
 /**
  * Engine for detecting Tajweed rules in Arabic Quranic text
  */
@@ -29,7 +41,7 @@ export class TajweedEngine {
   private detectGhunnah(text: string): TajweedSpan[] {
     const spans: TajweedSpan[] = [];
     // Pattern: ن or م followed by Shaddah (ّ)
-    const pattern = /[نم]\u0651/g;
+    const pattern = new RegExp(`[نم]${SHADDAH}`, 'g');
     let match;
 
     while ((match = pattern.exec(text)) !== null) {
@@ -52,8 +64,8 @@ export class TajweedEngine {
 
     // Noon Sakinah (نْ) or Tanween (ً ٌ ٍ) followed by ب
     const patterns = [
-      /ن\u0652[\s]*ب/g,           // Noon Sakinah + Ba
-      /[\u064B\u064C\u064D][\s]*ب/g, // Tanween + Ba
+      new RegExp(`ن${SUKOON}[\\s]*ب`, 'g'),           // Noon Sakinah + Ba
+      new RegExp(`[${TANWEEN_FATHATAN}${TANWEEN_DAMMATAN}${TANWEEN_KASRATAN}][\\s]*ب`, 'g'), // Tanween + Ba
     ];
 
     patterns.forEach(pattern => {
@@ -79,8 +91,8 @@ export class TajweedEngine {
     const idghaamLetters = 'يرملون';
 
     const patterns = [
-      new RegExp(`ن\\u0652[\\s]*[${idghaamLetters}]`, 'g'),
-      new RegExp(`[\\u064B\\u064C\\u064D][\\s]*[${idghaamLetters}]`, 'g'),
+      new RegExp(`ن${SUKOON}[\\s]*[${idghaamLetters}]`, 'g'),
+      new RegExp(`[${TANWEEN_FATHATAN}${TANWEEN_DAMMATAN}${TANWEEN_KASRATAN}][\\s]*[${idghaamLetters}]`, 'g'),
     ];
 
     patterns.forEach(pattern => {
@@ -106,8 +118,8 @@ export class TajweedEngine {
     const ikhfaLetters = 'تثجدذزسشصضطظفقك';
 
     const patterns = [
-      new RegExp(`ن\\u0652[\\s]*[${ikhfaLetters}]`, 'g'),
-      new RegExp(`[\\u064B\\u064C\\u064D][\\s]*[${ikhfaLetters}]`, 'g'),
+      new RegExp(`ن${SUKOON}[\\s]*[${ikhfaLetters}]`, 'g'),
+      new RegExp(`[${TANWEEN_FATHATAN}${TANWEEN_DAMMATAN}${TANWEEN_KASRATAN}][\\s]*[${ikhfaLetters}]`, 'g'),
     ];
 
     patterns.forEach(pattern => {
@@ -133,7 +145,7 @@ export class TajweedEngine {
     const qalqalahLetters = 'قطبجد';
 
     // With Sukoon
-    const pattern = new RegExp(`[${qalqalahLetters}]\\u0652`, 'g');
+    const pattern = new RegExp(`[${qalqalahLetters}]${SUKOON}`, 'g');
     let match;
 
     while ((match = pattern.exec(text)) !== null) {
@@ -170,9 +182,9 @@ export class TajweedEngine {
     const spans: TajweedSpan[] = [];
 
     const patterns = [
-      /[\u0622]/g,                    // Alif Madd (آ)
-      /[اوي]\u0653/g,                 // With Madd sign
-      /[اوي][\s]*[\u0621\u0623\u0624\u0625\u0626]/g, // Madd Munfasil
+      new RegExp(`[${ALIF_MADD}]`, 'g'),                    // Alif Madd (آ)
+      new RegExp(`[اوي]${MADD_SIGN}`, 'g'),                 // With Madd sign
+      new RegExp(`[اوي][\\s]*${HAMZA_VARIANTS}`, 'g'), // Madd Munfasil
     ];
 
     patterns.forEach(pattern => {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { TajweedEngine } from '@/lib/tajweed-engine';
 import { TAJWEED_RULES, TajweedRule } from '@/lib/tajweed-rules';
 import { WaqfPosition, WAQF_SIGNS } from '@/lib/waqf-signs';
@@ -18,6 +18,9 @@ interface TajweedTextProps {
   waqfPositions?: WaqfPosition[];
 }
 
+// Singleton instance of TajweedEngine for performance
+const tajweedEngine = new TajweedEngine();
+
 export default function TajweedText({
   arabicText,
   fontSize = 32,
@@ -28,9 +31,11 @@ export default function TajweedText({
   const [selectedRule, setSelectedRule] = useState<TajweedRule | null>(null);
   const [selectedWaqf, setSelectedWaqf] = useState<WaqfPosition | null>(null);
 
-  // Detect Tajweed spans
-  const engine = new TajweedEngine();
-  const tajweedSpans = showTajweed ? engine.analyze(arabicText) : [];
+  // Detect Tajweed spans (memoized to avoid unnecessary re-computation)
+  const tajweedSpans = useMemo(() => 
+    showTajweed ? tajweedEngine.analyze(arabicText) : [],
+    [arabicText, showTajweed]
+  );
 
   // Build text segments with colors
   const segments: JSX.Element[] = [];
