@@ -5,7 +5,13 @@ import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { metaImagesPlugin } from "./vite-plugin-meta-images";
 
+// Allow overriding the base URL for static deployments like GitHub Pages.
+// Set VITE_BASE_URL env var (e.g. "/Quran-Companion/") or use "./" for
+// relative paths when the deploy target is unknown.
+const base = process.env.VITE_BASE_URL ?? (process.env.VITE_DEPLOY_TARGET === "github-pages" ? "./" : "/");
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     runtimeErrorOverlay(),

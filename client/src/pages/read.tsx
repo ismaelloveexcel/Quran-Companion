@@ -1,6 +1,6 @@
 import { useParams, Link } from "wouter";
-import { ArrowLeft, Minus, Plus, Play, Pause, Lightbulb, Loader2, Share2, Check } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { ArrowLeft, Minus, Plus, Play, Pause, Lightbulb, Loader2, Share2, Check, SkipForward, SkipBack } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import TajweedGuide from "@/components/TajweedGuide";
@@ -24,6 +24,9 @@ export default function Read() {
   const surahNumber = parseInt(id || "1");
   const [fontSize, setFontSize] = useState(() => loadFontSize(32));
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentAyahIndex, setCurrentAyahIndex] = useState(0);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [showTips, setShowTips] = useState(() => loadShowTips(true));
   const [showLegend, setShowLegend] = useState(() => loadShowLegend(true));
   const [copiedVerse, setCopiedVerse] = useState<number | null>(null);
@@ -109,6 +112,106 @@ export default function Read() {
     } catch (err) {
       console.warn('All copy methods failed:', err);
     }
+  }, []);
+
+  // Audio playback helpers
+  const getAudioUrl = useCallback((globalAyahNumber: number) =>
+    `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${globalAyahNumber}.mp3`,
+  []);
+
+  const playAyah = useCallback((ayahs: Array<{ number: number; numberInSurah: number }>, index: number) => {
+    if (!ayahs || index < 0 || index >= ayahs.length) return;
+    const ayah = ayahs[index];
+    if (!ayah) return;
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+      // Remove all listeners by replacing the element reference
+      audioRef.current.src = "";
+      audioRef.current.load();
+    }
+
+    const audio = new Audio(getAudioUrl(ayah.number));
+    audioRef.current = audio;
+    setIsAudioLoading(true);
+    setCurrentAyahIndex(index);
+
+    const onCanPlay = () => setIsAudioLoading(false);
+    const onEnded = () => {
+      if (index + 1 < ayahs.length) {
+        playAyah(ayahs, index + 1);
+      } else {
+        setIsPlaying(false);
+        setCurrentAyahIndex(0);
+      }
+    };
+    const onError = () => {
+      setIsAudioLoading(false);
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener('canplay', onCanPlay);
+    audio.addEventListener('ended', onEnded);
+    audio.addEventListener('error', onError);
+
+    audio.play().catch(() => {
+      setIsAudioLoading(false);
+      setIsPlaying(false);
+    });
+  }, [getAudioUrl]);
+
+  const handlePlayPause = useCallback(() => {
+    if (!data) return;
+    const ayahs = data.arabic.ayahs;
+
+    if (isPlaying) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+    } else {
+      setIsPlaying(true);
+      if (audioRef.current?.paused && audioRef.current.src) {
+        audioRef.current.play().catch(() => setIsPlaying(false));
+      } else {
+        playAyah(ayahs, currentAyahIndex);
+      }
+    }
+  }, [isPlaying, data, currentAyahIndex, playAyah]);
+
+  const handleSkipBack = useCallback(() => {
+    if (!data) return;
+    const newIndex = Math.max(0, currentAyahIndex - 1);
+    if (isPlaying) {
+      playAyah(data.arabic.ayahs, newIndex);
+    } else {
+      setCurrentAyahIndex(newIndex);
+      // Clear loaded audio so next play starts from the new verse
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+    }
+  }, [data, currentAyahIndex, isPlaying, playAyah]);
+
+  const handleSkipForward = useCallback(() => {
+    if (!data) return;
+    const newIndex = Math.min(data.arabic.ayahs.length - 1, currentAyahIndex + 1);
+    if (isPlaying) {
+      playAyah(data.arabic.ayahs, newIndex);
+    } else {
+      setCurrentAyahIndex(newIndex);
+      // Clear loaded audio so next play starts from the new verse
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+    }
+  }, [data, currentAyahIndex, isPlaying, playAyah]);
+
+  // Stop audio when leaving the page
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+    };
   }, []);
 
   if (isLoading) {
@@ -247,7 +350,10 @@ export default function Read() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-10%" }}
                 transition={{ duration: 0.5 }}
-                className="group space-y-6"
+                className={cn(
+                  "group space-y-6 rounded-xl transition-colors",
+                  isPlaying && currentAyahIndex === index ? "bg-primary/5 ring-1 ring-primary/20 px-3 py-2 -mx-3" : ""
+                )}
                 data-testid={`ayah-${ayah.numberInSurah}`}
               >
                 <div className="flex flex-col gap-6">
@@ -309,18 +415,51 @@ export default function Read() {
       {/* Audio Player Bar */}
       <div className="fixed bottom-0 inset-x-0 bg-card border-t border-border p-4 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-50">
         <div className="max-w-md mx-auto flex items-center justify-between gap-4">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm truncate">{arabic.englishName}</p>
-            <p className="text-xs text-muted-foreground">Mishary Alafasy</p>
+            <p className="text-xs text-muted-foreground">
+              {isPlaying || audioRef.current?.src
+                ? `Verse ${arabic.ayahs[currentAyahIndex]?.numberInSurah ?? 1} of ${arabic.numberOfAyahs}`
+                : "Mishary Alafasy"}
+            </p>
           </div>
-          
-          <button 
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:bg-primary/90"
-            data-testid="button-play"
-          >
-            {isPlaying ? <Pause className="fill-current" /> : <Play className="fill-current ml-1" />}
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSkipBack}
+              disabled={currentAyahIndex === 0}
+              className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
+              aria-label="Previous verse"
+              data-testid="button-prev"
+            >
+              <SkipBack size={20} />
+            </button>
+
+            <button 
+              onClick={handlePlayPause}
+              className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:bg-primary/90"
+              data-testid="button-play"
+              aria-label={isPlaying ? "Pause" : "Play"}
+            >
+              {isAudioLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : isPlaying ? (
+                <Pause className="fill-current" />
+              ) : (
+                <Play className="fill-current ml-1" />
+              )}
+            </button>
+
+            <button
+              onClick={handleSkipForward}
+              disabled={currentAyahIndex === arabic.ayahs.length - 1}
+              className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
+              aria-label="Next verse"
+              data-testid="button-next"
+            >
+              <SkipForward size={20} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

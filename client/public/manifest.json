@@ -1,0 +1,23 @@
+{
+  "name": "Noor Al-Quran",
+  "short_name": "Noor",
+  "description": "A simplified, accessible Quran reading application designed for ease of use.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fdf8f0",
+  "theme_color": "#6b7c4c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
