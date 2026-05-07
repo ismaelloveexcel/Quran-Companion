@@ -201,29 +201,32 @@ Translation:     In name  of Allah  the Merciful  the Compassionate
 
 ## Immediate Recommendations (Quick Wins)
 
-### 1. Persistent Settings (Easy - 1 hour)
-Save font size and theme preference to localStorage:
-```typescript
-// Save on change
-localStorage.setItem('fontSize', fontSize.toString());
-// Load on mount
-const savedSize = localStorage.getItem('fontSize');
-```
+### 1. ✅ Persistent Settings (Implemented)
+Font size, show-tips, and show-legend preferences are saved to localStorage and restored on reload.
 
-### 2. Reading Progress Indicator (Easy - 2 hours)
-Show "5 of 286 verses" and progress bar at top of reading page.
+### 2. ✅ Reading Progress Indicator (Implemented)
+The read page shows verse count and revelation type in the sticky header.
 
 ### 3. Transliteration Display (Medium - 4 hours)
 Add transliteration field to verse data and display it below Arabic text in a muted color.
 
-### 4. Bismillah Skip Button (Easy - 1 hour)
-Add option to show/hide Bismillah for users who prefer to skip it.
+### 4. ✅ Bismillah Handling (Implemented)
+Bismillah is correctly skipped for Al-Fatiha (Surah 1) and At-Tawbah (Surah 9).
 
-### 5. Share Verse Button (Easy - 2 hours)
-Add share icon to copy verse text or share via Web Share API.
+### 5. ✅ Share Verse Button (Implemented)
+Each verse has a share button using the Web Share API (mobile) with clipboard fallback.
 
-### 6. Last Read Tracker (Medium - 3 hours)
-Store last read surah+verse in localStorage and show "Continue Reading" card on home.
+### 6. ✅ Last Read Tracker (Implemented)
+Last-read surah is stored in localStorage and shown as a "Continue Reading" card on the home screen.
+
+### 7. ✅ Functional Audio Player (Implemented)
+Audio recitation by Mishary Alafasy streams from the alquran.cloud CDN. Includes play/pause, skip forward/back between verses, loading indicator, and active verse highlighting.
+
+### 8. ✅ GitHub Pages Deployment (Implemented)
+A GitHub Actions workflow auto-deploys the app to GitHub Pages on every push to `main`. See the [Deployment Alternatives](#deployment-alternatives) section.
+
+### 9. ✅ PWA Installable (Implemented)
+A `manifest.json` and relevant `<meta>` tags allow users to install the app from their browser to their home screen.
 
 ---
 
@@ -295,7 +298,86 @@ Low Impact, Easy          | Low Impact, Hard
 
 ---
 
-## Cost & Resource Estimates
+## Deployment Alternatives
+
+### Option 1: GitHub Pages (Static / Free) ✅ *Now Configured*
+
+GitHub Pages hosts the compiled React app as a static site — **no server required**.
+
+**How it works:**
+- A GitHub Actions workflow (`.github/workflows/deploy-pages.yml`) builds the client and deploys it to the `gh-pages` environment automatically on every push to `main`.
+- The Vite build uses relative paths (`base: "./"`) so the app works at any URL depth.
+
+**Limitations:**
+- API calls must go to external services (no Express server). The app already uses the external `api.alquran.cloud` API, so this is compatible.
+- No server-side sessions or database (PostgreSQL setup is unused in static mode).
+
+**Enable in your repo:**
+1. Go to **Settings → Pages → Source** and select **GitHub Actions**.
+2. Push to `main` — the workflow will build and deploy automatically.
+3. App will be live at `https://<username>.github.io/<repo-name>/`.
+
+---
+
+### Option 2: Vercel (Recommended for Full-Stack)
+
+- Connect your GitHub repo; Vercel auto-detects the Vite project.
+- Build command: `npx vite build`; output: `dist/public`.
+- Free tier includes custom domains, HTTPS, and global CDN.
+- Supports server-side functions if you later add an API layer.
+
+**Deploy:** https://vercel.com/new → Import GitHub repo.
+
+---
+
+### Option 3: Netlify (Static / Free)
+
+Similar to Vercel. Drag-and-drop or connect repo.
+
+- Build command: `npx vite build`
+- Publish directory: `dist/public`
+- Add a `public/_redirects` file with `/* /index.html 200` for client-side routing.
+
+---
+
+### Option 4: Railway / Render (Full-Stack with Server)
+
+Use these if you want to run the Express server and PostgreSQL database:
+
+- **Railway:** `npm run build && npm start` — one-click deploy.
+- **Render:** Similar; set start command to `npm start`.
+- Cost: ~$5-10/month after free tier.
+
+---
+
+### Option 5: Self-Hosted / VPS
+
+Deploy to any VPS (DigitalOcean, Linode, AWS EC2):
+```bash
+npm run build
+npm start  # serves dist/public as static files via Express
+```
+
+Use Nginx as a reverse proxy with SSL from Let's Encrypt.
+
+---
+
+### Summary Table
+
+| Platform | Cost | Server | Database | Difficulty |
+|---|---|---|---|---|
+| **GitHub Pages** | Free | ❌ | ❌ | Easy |
+| **Vercel** | Free tier | ✅ (Functions) | ❌ | Easy |
+| **Netlify** | Free tier | ✅ (Functions) | ❌ | Easy |
+| **Railway** | ~$5/mo | ✅ | ✅ | Medium |
+| **Render** | Free/~$7/mo | ✅ | ✅ | Medium |
+| **VPS** | ~$5/mo | ✅ | ✅ | Hard |
+
+**Recommendation:** Start with **GitHub Pages** for instant free deployment. Migrate to **Vercel** when you need more control, and to **Railway** when you add user accounts/databases.
+
+---
+
+
 
 ### Development Time (Full-Stack Developer)
 - Phase 1: 40-60 hours (2-3 weeks)
